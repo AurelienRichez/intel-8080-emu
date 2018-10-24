@@ -1,0 +1,20 @@
+[package]
+name = "intel-8080-emu"
+version = "0.1.0"
+authors = ["Aurélien Richez <aurelien.richez@gmail.com>"]
+
+
+description = "A small library to emulate an intel 8080."
+
+repository = "https://github.com/AurelienRichez/intel-8080-emu"
+
+readme = "README.md"
+
+keywords = ["emulator", "intel-8080"]
+
+categories = ["emulators"]
+
+license = "MPL-2.0"
+
+[badges]
+maintenance = { status = "actively-developed" }
