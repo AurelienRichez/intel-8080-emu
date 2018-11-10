@@ -190,7 +190,10 @@ impl OpCode {
         }
     }
 
-    pub fn cycles(&self) -> u64 {
+    /// Cycles of the opcode as described in the 8080 manual. These are memory cycles and not cpu cycles.
+    /// # See also
+    /// [states](#method.states)
+    pub fn cycles(&self, jumped: bool) -> u64 {
         match *self {
             // Data transfer
             Mov(_, _) => 1,
@@ -267,13 +270,103 @@ impl OpCode {
             // Branch
             Jmp(_) | Jnz(_) | Jz(_) | Jnc(_) | Jc(_) | Jpo(_) | Jpe(_) | Jp(_) | Jm(_) => 3,
             Call(_) => 5,
-            Cnz(_) | Cz(_) | Cnc(_) | Cc(_) | Cpo(_) | Cpe(_) | Cp(_) | Cm(_) => 5, // actually between 3 and 5
+            Cnz(_) | Cz(_) | Cnc(_) | Cc(_) | Cpo(_) | Cpe(_) | Cp(_) | Cm(_) => if jumped { 5 } else { 3 },
             Ret => 3,
-            Rnz | Rz | Rnc | Rc | Rpo | Rpe | Rp | Rm => 3, // actually between 1 and 3
+            Rnz | Rz | Rnc | Rc | Rpo | Rpe | Rp | Rm => if jumped { 1 } else { 3 },
             Rst(_) => 3,
             Pchl => 1,
 
             _ => 1,
+        }
+    }
+
+    /// States of the opcode as described in the 8080 manual. These are cpu cycles.
+    /// # See also
+    /// [cycles](#method.cycles)
+    pub fn states(&self, jumped: bool) -> u64 {
+        match *self {
+            // Data transfer
+            Mov(_, _) => 5,
+            MovFromM(_) => 7,
+            MovToM(_) => 7,
+            Mvi(_, _) => 7,
+            MviM(_) => 10,
+            Lxi(_, _) => 10,
+            Lda(_) => 13,
+            Sta(_) => 13,
+            Lhld(_) => 16,
+            Shld(_) => 16,
+            LdaxB => 7,
+            LdaxD => 7,
+            StaxB => 7,
+            StaxD => 7,
+            Xchg => 4,
+
+            // Arithmetic
+            Add(_) => 4,
+            AddM => 7,
+            Adi(_) => 7,
+            Adc(_) => 4,
+            AdcM => 7,
+            Aci(_) => 7,
+            Sub(_) => 4,
+            SubM => 7,
+            Sui(_) => 7,
+            Sbb(_) => 4,
+            SbbM => 7,
+            Sbi(_) => 7,
+            Inr(_) => 5,
+            InrM => 10,
+            Dcr(_) => 5,
+            DcrM => 10,
+            Inx(_) => 5,
+            Dcx(_) => 5,
+            Dad(_) => 10,
+            Daa => 4,
+
+            // Logical
+            Ana(_) => 4,
+            AnaM => 7,
+            Ani(_) => 7,
+            Xra(_) => 4,
+            XraM => 7,
+            Xri(_) => 7,
+            Ora(_) => 7,
+            OraM => 7,
+            Ori(_) => 7,
+            Cmp(_) => 4,
+            CmpM => 7,
+            Cpi(_) => 7,
+            Rlc => 4,
+            Rrc => 4,
+            Ral => 4,
+            Rar => 4,
+            Cma => 4,
+            Cmc => 4,
+            Stc => 4,
+
+            // Stack, I/O, and Machine Control
+            Push(_) => 11,
+            PushPSW => 11,
+            Pop(_) => 10,
+            PopPSW => 10,
+            Xthl => 18,
+            Sphl => 5,
+            In(_) => 10,
+            Out(_) => 10,
+            Ei => 4,
+            Di => 4,
+            Hlt => 7,
+            Nop => 4,
+
+            // Branch
+            Jmp(_) | Jnz(_) | Jz(_) | Jnc(_) | Jc(_) | Jpo(_) | Jpe(_) | Jp(_) | Jm(_) => 10,
+            Call(_) => 17,
+            Cnz(_) | Cz(_) | Cnc(_) | Cc(_) | Cpo(_) | Cpe(_) | Cp(_) | Cm(_) => if jumped { 17 } else { 11 },
+            Ret => 10,
+            Rnz | Rz | Rnc | Rc | Rpo | Rpe | Rp | Rm => if jumped { 5 } else { 11 },
+            Rst(_) => 11,
+            Pchl => 5
         }
     }
 }

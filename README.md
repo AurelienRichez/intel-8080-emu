@@ -34,14 +34,14 @@ let i8080 = Proc8080::new(memory, data_bus);
 
 // we're ready ! 
 // Here is naive way to slow down the simulation so that it matches the original speed of the 8080
-let mut cycles = i8080.cycles();
+let mut states = i8080.states();
 loop {
     // emulates runs one "step" of the simulation by running the next opcode, mutating the 
-    // processor state accordingly and increasing the cycle count
+    // processor state accordingly and increasing the states count
     i8080.emulate();
-    // you can manage time with Proc8080:cycles()
+    // you can manage time with Proc8080:states()
     // A cycle for the 8080 took approximately 500 nanoseconds
-    std::thread::sleep(std::time::Duration::from_nanos(500) * (i8080.cycles() - cycles)
+    std::thread::sleep(std::time::Duration::from_nanos(500) * (i8080.states() - states)
 }   
 
 ```

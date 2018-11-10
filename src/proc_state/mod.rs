@@ -39,6 +39,7 @@ pub struct Proc8080<Bus: DataBus> {
     registers: Registers,
     memory: Box<[u8]>,
     cycles: u64,
+    states: u64,
     interupt_enabled: bool,
     stopped: bool,
     data_bus: Bus
@@ -62,6 +63,7 @@ impl<Bus: DataBus> Proc8080<Bus> {
             registers: Default::default(),
             memory: mem,
             cycles: 0,
+            states: 0,
             interupt_enabled: false,
             stopped: false,
             data_bus,
@@ -131,6 +133,7 @@ impl<Bus: DataBus> Proc8080<Bus> {
     }
     
     fn apply_op(&mut self, op: OpCode) {
+        let pc_before = self.registers.pc;
         match op {
             Nop => (),
 
@@ -241,7 +244,8 @@ impl<Bus: DataBus> Proc8080<Bus> {
             Di => self.interupt_enabled = false,
             Hlt => self.stopped = false,
         }
-        self.cycles += op.cycles();
+        self.cycles += op.cycles(pc_before != self.registers().pc);
+        self.states += op.states(pc_before != self.registers().pc);
     }
 
     fn move_to_mem(&mut self, reg: Register) {
